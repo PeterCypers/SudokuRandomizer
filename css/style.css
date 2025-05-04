@@ -1,0 +1,65 @@
+body{
+    margin: 20px;
+}
+table,td,tr{
+    border-collapse: collapse;
+}
+.innerTable td{
+    border: 2px solid black;
+
+}
+.sudokuCell{
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+}
+#outerTable>tbody>tr>td,
+#outerTable2>tbody>tr>td{
+    padding: 2px;
+}
+.sudokuCell{
+    text-align: center;
+}
+.hidden{
+    display: none;
+}
+button{
+    padding: 10px;
+    width: 80px;
+    height: 60px;
+}
+#buttons{
+    display: grid;
+    grid-template-columns: 100px 100px 50%;
+}
+ul{
+    display: flex;
+    padding-left: 15px;
+}
+li{
+    list-style-type: none;
+    padding: 0px 10px;
+    border-right: 2px solid black;
+}
+ul>:last-child{
+    border-right: unset;
+}
+.smallbtn{
+    height: 30px;
+    font-size: x-small;
+    padding: 0px;
+}
+.green{
+    color: green;
+}
+.orange{
+    color: orange;
+}
+.red{
+    color: red;
+}
+@media screen and (min-width: 800px){
+    #completedList{
+        max-width: 200px;
+    }
+}
