@@ -1,0 +1,43 @@
+is online -> https://www.infinityfree.com/
+
+to put online, don't include Dockerfile or documentation folder
+
+Sudoku Hard Coded
+------------------
+the homepage won't work offline, security risk -> try to load from filesystem, it needs to run in VSC or another server
+-> see documentation/ sudoku hardcoded error message.png (blocked by CORS policy)
+
+API
+---
+works offline
+
+Random generated
+----------------
+on hold for now
+
+Sudoku Generate Test
+--------------------
+an attempt at generating sudoku, visual feedback on the problem
+
+Bart online page: http://hogent-test.infinityfreeapp.com/?i=1
+
+om in een Virtuele Machine te openen met docker image: zie docker file, zie "linux sudoku in VM Fedora 01"
+
+commandos: overal sudo vöör schrijven voor permissies
+commandos:
+
+sudo docker build -t sudoku:peter .
+
+sudo docker run -it --rm --init -p 3000:3000 sudoku:peter
+
+surf naar: (probeert telkens https secure te openen, maar doe de "s" weg)
+http://localhost:3000
+
+sudoku-spelen:
+--------------
+start met hard-coded
+opent een nieuw page die de opgeslagen(localstorage) template genereert die kan ingevuld worden,
+je moet ze kunnen opslaan, (ook de nummer van de gekozen sudoku moet opgeslagen worden)
+je moet kunnen terug keren, elke keer dat een cijfer ingevuld wordt moet die automatisch opslaan in storage
+de gekende (gegeven ingevulde sudoku nummers) moeten onveranderbaar zijn en opvallend (bgc gray)
+je moet je actief spel kunnen opslaan, en ook een oude spel ophalen (save / load) games

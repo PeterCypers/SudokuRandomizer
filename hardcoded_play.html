@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play-Sudoku(Hardcoded)</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" href="images/sudoku2.png" type="image/x-icon">
+    <script>
+        const storage = window.localStorage;
+
+        function init(){
+            const save = document.getElementById("saveBTN");
+            const load = document.getElementById("loadBTN");
+            document.getElementById("game_number").innerText = storage.getItem("selectedTemplate");
+
+            save.onclick = saveGame;
+            load.onclick = loadGame;
+
+            const chosenSudoku = JSON.parse(storage.getItem("hardcoded_sudoku_choice"));
+            const selectedTemplate = storage.getItem("selectedTemplate");
+            initializeRows(chosenSudoku, selectedTemplate, false);
+        }
+
+        async function initializeRows(sudokuGrid, template, isComplex){
+            console.log(sudokuGrid, template); //check
+
+            //passed grid + template from index.html initialized on load, saved in own localstorage key
+            //on load-game this function is called again but using a different set of keys specific in saveGame function
+            document.getElementById("game_number").innerText = template;
+            document.getElementById("difficulty").innerText = template <= 12? "Easy" : template <= 184? "Medium" : "Hard";
+            document.getElementById("difficulty").style.color = template <= 12? "deepskyblue" : template <= 184? "orange" : "red";
+            //severe alteration to the way sudoku is saved to accomodate knowing wether it was a manually filled in cell or a default filled in cell
+            if(!isComplex){
+                    for (let j = 1; j <= 9; j++){
+                        // console.log(j);
+
+                    for (let i = 0; i < document.getElementsByClassName(`row${j}`).length; i++) {
+                        let cell = document.getElementsByClassName(`row${j}`)[i];
+                        // console.log(cell);
+                        cell.innerText = sudokuGrid[j-1][i] || "";
+                        if(cell.innerText !== ""){
+                            cell.style.backgroundColor = "palegreen";
+                        }
+                    }
+                    }
+                    /* empty cells innerHTML =
+                    `<input type="number" min="1" max="9" style="height: 48px; width: 48px; text-align: center; font-size: 2rem;">`
+                    */
+                    for (let i = 0; i < document.getElementsByClassName("sudokuCell").length; i++) {
+                        let cell = document.getElementsByClassName("sudokuCell")[i];
+                        if(!cell.innerHTML){
+                            cell.innerHTML = `<input type="number" min="1" max="9" style="height: 50px; width: 50px; text-align: center; font-size: 2rem;">`;
+                            cell.childNodes[0].style.backgroundColor = "darkturquoise";
+                        }
+                    }
+            }
+            // zelfs als een (interactieve)cell ingevuld is, moet deze weer als innerHTML een input: number krijgen en daarna de opgeslagen waarde ingevuld krijgen
+            if(isComplex){
+                for (let j = 1; j <= 9; j++){
+                    for (let i = 0; i < document.getElementsByClassName(`row${j}`).length; i++) {
+                        let cell = document.getElementsByClassName(`row${j}`)[i];
+                        // console.log(cell);
+                        if(sudokuGrid[j-1][i].interactive){
+                            cell.innerHTML = `<input type="number" min="1" max="9" style="height: 50px; width: 50px; text-align: center; font-size: 2rem;">`;
+                            cell.childNodes[0].value = sudokuGrid[j-1][i].value;
+                            cell.childNodes[0].style.backgroundColor = "darkturquoise";
+                        }else{
+                            cell.innerText = sudokuGrid[j-1][i].value || "";
+                            if(cell.innerText !== ""){
+                                cell.style.backgroundColor = "palegreen";
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        function saveGame(){
+            /* differentiate between a td cell and a input number cell:
+               Boolean(document.getElementsByClassName("sudokuCell")[0].childNodes[0].value);
+               (first index goes over every cell element, for use in this function we'll be looping over rows instead)
+               if it contains a input it will return '' if no value has been selected, or the selected value, for td cell it will return undefined
+            */
+            let sudoku = [[],[],[],[],[],[],[],[],[]];
+            if(confirm("Really save game?")){
+
+                for (let j = 1; j <= 9; j++) {
+                    for (let i = 0; i < document.getElementsByClassName(`row${j}`).length; i++) {
+                        let cell = document.getElementsByClassName(`row${j}`)[i];
+                        if(cell.childNodes[0].value === undefined){ // non-interactable cell
+                            let number = cell.innerText;
+                            sudoku[j-1].push({value : number, interactive : false});
+                        }else{ //interactable cell
+                            let number = cell.childNodes[0].value;
+                            sudoku[j-1].push({value : number, interactive : true});
+                        }
+                    }
+                }
+                storage.setItem("hardcoded_saved_game", JSON.stringify(sudoku));
+                storage.setItem("hardcoded_saved_template", document.getElementById("game_number").innerText);
+            }
+        }
+
+        function loadGame(){
+            if(confirm("Really load game?")){
+                if(!storage.getItem("hardcoded_saved_game")){
+                    alert("No Saved Games...");
+                }else{
+                    let sudoku = JSON.parse(storage.getItem("hardcoded_saved_game"));
+                    let template = storage.getItem("hardcoded_saved_template");
+                    initializeRows(sudoku, template, true);
+                }
+            }
+        }
+
+
+        window.onload = init;
+    </script>
+    <style>
+        #loadBTN{
+            padding: 0px 10px 0px 10px;
+            margin-bottom: auto;
+            position: relative;
+            top: -8px;
+        }
+        tbody{
+            width: 182.4px;
+            height: 176.4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html">return</a>
+    <h1 style="text-decoration: underline;">Play Sudoku (HardCoded)</h1>
+    <p style="display: inline-block; font-size: 1.2rem;">Game Number =</p> 
+    <p style="display: inline-block; font-size: 1.2rem;background-color: palegreen; border: 3px solid darkturquoise; padding: 5px;" id="game_number"></p>
+    <p style="display: inline-block; font-size: 1.2rem; margin-left: 50px;">Difficulty = </p>
+    <p style="display: inline-block; font-size: 1.2rem; margin-left: 8px;" id="difficulty"></p>
+    <div id="hc_play_buttons">
+        <!-- todo: make look nicer, remove borders -->
+        <button id="saveBTN" style="margin-right: 50px; margin-bottom: 20px;">Save Game</button> <button id="loadBTN">Load Saved Game</button>
+    </div>
+    <table id="outerTable" class="shown" style="margin-top: 5px;">
+        <tr>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row1 col1"></td>
+                        <td class="sudokuCell row1 col2"></td>
+                        <td class="sudokuCell row1 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row2 col1"></td>
+                        <td class="sudokuCell row2 col2"></td>
+                        <td class="sudokuCell row2 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row3 col1"></td>
+                        <td class="sudokuCell row3 col2"></td>
+                        <td class="sudokuCell row3 col3"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row1 col4"></td>
+                        <td class="sudokuCell row1 col5"></td>
+                        <td class="sudokuCell row1 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row2 col4"></td>
+                        <td class="sudokuCell row2 col5"></td>
+                        <td class="sudokuCell row2 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row3 col4"></td>
+                        <td class="sudokuCell row3 col5"></td>
+                        <td class="sudokuCell row3 col6"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row1 col7"></td>
+                        <td class="sudokuCell row1 col8"></td>
+                        <td class="sudokuCell row1 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row2 col7"></td>
+                        <td class="sudokuCell row2 col8"></td>
+                        <td class="sudokuCell row2 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row3 col7"></td>
+                        <td class="sudokuCell row3 col8"></td>
+                        <td class="sudokuCell row3 col9"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row4 col1"></td>
+                        <td class="sudokuCell row4 col2"></td>
+                        <td class="sudokuCell row4 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row5 col1"></td>
+                        <td class="sudokuCell row5 col2"></td>
+                        <td class="sudokuCell row5 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row6 col1"></td>
+                        <td class="sudokuCell row6 col2"></td>
+                        <td class="sudokuCell row6 col3"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable" style="width: 184px;">
+                    <tr>
+                        <td class="sudokuCell row4 col4"></td>
+                        <td class="sudokuCell row4 col5"></td>
+                        <td class="sudokuCell row4 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row5 col4"></td>
+                        <td class="sudokuCell row5 col5"></td>
+                        <td class="sudokuCell row5 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row6 col4"></td>
+                        <td class="sudokuCell row6 col5"></td>
+                        <td class="sudokuCell row6 col6"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row4 col7"></td>
+                        <td class="sudokuCell row4 col8"></td>
+                        <td class="sudokuCell row4 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row5 col7"></td>
+                        <td class="sudokuCell row5 col8"></td>
+                        <td class="sudokuCell row5 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row6 col7"></td>
+                        <td class="sudokuCell row6 col8"></td>
+                        <td class="sudokuCell row6 col9"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row7 col1"></td>
+                        <td class="sudokuCell row7 col2"></td>
+                        <td class="sudokuCell row7 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row8 col1"></td>
+                        <td class="sudokuCell row8 col2"></td>
+                        <td class="sudokuCell row8 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row9 col1"></td>
+                        <td class="sudokuCell row9 col2"></td>
+                        <td class="sudokuCell row9 col3"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row7 col4"></td>
+                        <td class="sudokuCell row7 col5"></td>
+                        <td class="sudokuCell row7 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row8 col4"></td>
+                        <td class="sudokuCell row8 col5"></td>
+                        <td class="sudokuCell row8 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row9 col4"></td>
+                        <td class="sudokuCell row9 col5"></td>
+                        <td class="sudokuCell row9 col6"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row7 col7"></td>
+                        <td class="sudokuCell row7 col8"></td>
+                        <td class="sudokuCell row7 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row8 col7"></td>
+                        <td class="sudokuCell row8 col8"></td>
+                        <td class="sudokuCell row8 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row9 col7"></td>
+                        <td class="sudokuCell row9 col8"></td>
+                        <td class="sudokuCell row9 col9"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!--********************************** table 2 start *********************************-->
+    <!-- <table id="outerTable2" class="hidden">
+        <tr>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row1 col1"></td>
+                        <td class="sudokuCell row1 col2"></td>
+                        <td class="sudokuCell row1 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row2 col1"></td>
+                        <td class="sudokuCell row2 col2"></td>
+                        <td class="sudokuCell row2 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row3 col1"></td>
+                        <td class="sudokuCell row3 col2"></td>
+                        <td class="sudokuCell row3 col3"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row1 col4"></td>
+                        <td class="sudokuCell row1 col5"></td>
+                        <td class="sudokuCell row1 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row2 col4"></td>
+                        <td class="sudokuCell row2 col5"></td>
+                        <td class="sudokuCell row2 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row3 col4"></td>
+                        <td class="sudokuCell row3 col5"></td>
+                        <td class="sudokuCell row3 col6"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row1 col7"></td>
+                        <td class="sudokuCell row1 col8"></td>
+                        <td class="sudokuCell row1 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row2 col7"></td>
+                        <td class="sudokuCell row2 col8"></td>
+                        <td class="sudokuCell row2 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row3 col7"></td>
+                        <td class="sudokuCell row3 col8"></td>
+                        <td class="sudokuCell row3 col9"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row4 col1"></td>
+                        <td class="sudokuCell row4 col2"></td>
+                        <td class="sudokuCell row4 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row5 col1"></td>
+                        <td class="sudokuCell row5 col2"></td>
+                        <td class="sudokuCell row5 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row6 col1"></td>
+                        <td class="sudokuCell row6 col2"></td>
+                        <td class="sudokuCell row6 col3"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row4 col4"></td>
+                        <td class="sudokuCell row4 col5"></td>
+                        <td class="sudokuCell row4 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row5 col4"></td>
+                        <td class="sudokuCell row5 col5"></td>
+                        <td class="sudokuCell row5 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row6 col4"></td>
+                        <td class="sudokuCell row6 col5"></td>
+                        <td class="sudokuCell row6 col6"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row4 col7"></td>
+                        <td class="sudokuCell row4 col8"></td>
+                        <td class="sudokuCell row4 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row5 col7"></td>
+                        <td class="sudokuCell row5 col8"></td>
+                        <td class="sudokuCell row5 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row6 col7"></td>
+                        <td class="sudokuCell row6 col8"></td>
+                        <td class="sudokuCell row6 col9"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row7 col1"></td>
+                        <td class="sudokuCell row7 col2"></td>
+                        <td class="sudokuCell row7 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row8 col1"></td>
+                        <td class="sudokuCell row8 col2"></td>
+                        <td class="sudokuCell row8 col3"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row9 col1"></td>
+                        <td class="sudokuCell row9 col2"></td>
+                        <td class="sudokuCell row9 col3"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row7 col4"></td>
+                        <td class="sudokuCell row7 col5"></td>
+                        <td class="sudokuCell row7 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row8 col4"></td>
+                        <td class="sudokuCell row8 col5"></td>
+                        <td class="sudokuCell row8 col6"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row9 col4"></td>
+                        <td class="sudokuCell row9 col5"></td>
+                        <td class="sudokuCell row9 col6"></td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="innerTable">
+                    <tr>
+                        <td class="sudokuCell row7 col7"></td>
+                        <td class="sudokuCell row7 col8"></td>
+                        <td class="sudokuCell row7 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row8 col7"></td>
+                        <td class="sudokuCell row8 col8"></td>
+                        <td class="sudokuCell row8 col9"></td>
+                    </tr>
+                    <tr>
+                        <td class="sudokuCell row9 col7"></td>
+                        <td class="sudokuCell row9 col8"></td>
+                        <td class="sudokuCell row9 col9"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table> -->
+</body>
+</html>
